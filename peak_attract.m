@@ -401,7 +401,7 @@ end
 out.dynamics = struct;
 out.dynamics.f = out.func.fval;
 out.dynamics.event = out.func.event;
-
+out.dynamics.discrete = options.discrete;
 out.dynamics.time_indep = 1;
 event_all = @(tt, xt) cell2mat(cellfun(@(ex) ex(tt, xt), out.func.event, 'UniformOutput', false));
 % %% functions and dual variables
@@ -414,10 +414,11 @@ out.func.Lv_fw = Lv_fw;
 out.func.Lv_bk = Lv_bk;
  
 % %functions that should be nonnegative along valid trajectories
-out.func.cost_all = cell(nobj, 1);
-for i = 1:nobj
-    out.func.cost_all{i} = @(x) (eval(options.obj(i), xp, x));
-end
+% out.func.cost_all = cell(nobj, 1);
+% for i = 1:nobj
+%     out.func.cost_all{i} = @(x) (eval(options.obj(i), xp, x));
+% end
+out.func.cost_all = @(x) eval(options.obj, xp, x);
 % 
 if nobj > 1
     out.func.cost = @(x) min(eval(options.obj, xp, x));
@@ -429,31 +430,46 @@ end
 % %under multiple cost functions. Check that out later, proper dual
 % %representation and verification of nonnegativity
 % 
-if nw > 0
-    %there are uncertain parameters
-    out.func.vval = @(x, w) eval(v, [xp; wp], [x; w*ones(1, size(x, 2))]);    %dual v(t,x,w)
-    out.func.Lvval = @(x, w) eval(Lv, [xp; wp], [x; w*ones(1, size(x, 2))]);  %Lie derivative Lv(t,x,w)
+if nw > 0    
+    %some uncertain parameters
+    out.func.vval_fw = @(x, w) eval(v_fw, [xp; wp], [x; w*ones(1, size(x, 2))]);     %forward value function
+    out.func.vval_bk = @(x, w) eval(v_bk, [xp; wp], [x; w*ones(1, size(x, 2))]);     %backward value function
     
+    out.func.vval = @(x, w) eval(v_fw + v_bk, [xp; wp], [x; w*ones(1, size(x, 2))]); %v_fw + v_bk (total value function)
     
-    out.func.nonneg = @(x, w) [out.func.vval(x, w) + obj_rec; out.discount*out.vval_fw(x, w) - out.func.Lvval_fw(x, w); -out.func.vval(x, w) - theta'*out.func.cost(x)];
+    out.func.Lvval_fw = @(x) eval(Lv_fw, [xp; wp], [x; w*ones(1, size(x, 2))]);   %Forward Lie derivative or pushforward
+    out.func.Lvval_bk = @(x) eval(Lv_bk, [xp; wp], [x; w*ones(1, size(x, 2))]);   %Backward Lie derivative or pushforward
+    
+    if options.discrete
+         out.func.nonneg = @(x, w) [obj_rec - out.func.vval(x, w) - out.func.theta'*out.func.cost_all(x, w); ...
+            options.discount*out.func.vval_fw(x, w) - out.func.Lvval_fw(x, w);...
+            options.discount*out.func.vval_bk(x, w) + out.func.Lvval_bk(x, w)];
+    else
+        out.func.nonneg = @(x, w) [obj_rec - out.func.vval(x, w) - out.func.theta'*out.func.cost_all(x, w); ...
+            out.func.vval_fw(x, w) - options.discount*out.func.Lvval_fw(x, w);...
+            out.func.Lvval_bk(x, w) + options.discount*out.func.vval_bk(x, w)];
+    end
 else
     %no uncertain parameters
-    out.func.vval_fw = @(x) eval(v_fw, xp, x);
-    out.func.vval_bk = @(x) eval(v_bk, xp, x);
+    out.func.vval_fw = @(x) eval(v_fw, xp, x);     %forward value function
+    out.func.vval_bk = @(x) eval(v_bk, xp, x);     %backward value function
     
-    out.func.vval = @(x) eval(v_fw + v_bk, xp, x);    %dual v(t,x,w)
+    out.func.vval = @(x) eval(v_fw + v_bk, xp, x); %v_fw + v_bk (total value function)
     
     out.func.Lvval_fw = @(x) eval(Lv_fw, xp, x);   %Forward Lie derivative or pushforward
     out.func.Lvval_bk = @(x) eval(Lv_bk, xp, x);   %Backward Lie derivative or pushforward
     
     if options.discrete
-         out.func.nonneg = @(x) [obj_rec - out.func.vval(x) - out.theta'*out.func.cost_all(x); ...
-            out.discount*out.vval_fw(x) - out.func.Lvval_fw(x)...
-            out.discount*out.vval_bk(x) + out.func.Lvval_bk(x)];
+        %discrete
+        out.func.nonneg = @(x) [obj_rec - out.func.vval(x) - out.func.theta'*out.func.cost_all(x); ...
+            out.func.vval_fw(x) - options.discount*out.func.Lvval_fw(x);...
+            out.func.Lvval_bk(x) + options.discount*out.func.vval_bk(x)];
     else
-        out.func.nonneg = @(x) [obj_rec - out.func.vval(x) - out.theta'*out.func.cost_all(x); ...
-            out.vval_fw(x) - out.discount*out.func.Lvval_fw(x)...
-            out.Lvval_bk(x) + out.discount*out.func.vval_bk(x)];
+        %continuous
+         out.func.nonneg = @(x) [obj_rec - out.func.vval(x) - out.func.theta'*out.func.cost_all(x); ...
+            options.discount*out.func.vval_fw(x) - out.func.Lvval_fw(x);...
+            options.discount*out.func.vval_bk(x) + out.func.Lvval_bk(x)];
+    
     end
             
 end
