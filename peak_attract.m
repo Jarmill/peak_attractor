@@ -332,8 +332,8 @@ Lv_fw = [];
 Lv_bk = [];
 for i = 1:nsys
     if options.discrete
-        Lv_fw_curr = subs(v_fw, [xp; wp], [options.dynamics.f; wp]);
-        Lv_bk_curr = subs(v_bk, [xp; wp], [options.dynamics.f; wp]);
+        Lv_fw_curr = subs(v_fw, [xp; wp], [options.dynamics.f{i}; wp]);
+        Lv_bk_curr = subs(v_bk, [xp; wp], [options.dynamics.f{i}; wp]);
     else
         Lv_fw_curr = diff(v_fw, xp)*options.dynamics.f{i};
         Lv_bk_curr = diff(v_bk, xp)*options.dynamics.f{i};
@@ -532,11 +532,11 @@ function [mu, mon, X_occ, Ay] = occupation_measure(f, X, var, var_new, d, forwar
 
     if discrete
         %discrete system
-        pushforward = mmon([f_occ; w_occ], d);
+        pushforward = subs(mon, vars_new, [f_occ; w_occ]);
         if forward
             Ay = mom(mon) - discount * mom(pushforward);             
         else
-            Ay = mom(pushforward) + discount * mom(mon);
+            Ay = mom(pushforward) - discount * mom(mon);
         end
     else
         %continuous system

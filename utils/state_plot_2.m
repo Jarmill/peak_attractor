@@ -22,7 +22,11 @@ for i = 1:length(out_sim)
     if i == 1  
         axis square
         hold on
-        plot(out_sim{i}.x(:, 1), out_sim{i}.x(:, 2), 'c', 'DisplayName', 'Trajectories');
+        if out.dynamics.discrete
+            scatter(out_sim{i}.x(:, 1), out_sim{i}.x(:, 2), '.c', 'DisplayName', 'Trajectories');
+        else
+            plot(out_sim{i}.x(:, 1), out_sim{i}.x(:, 2), 'c', 'DisplayName', 'Trajectories');
+        end
 %         title(['Phase Plane of Trajectories, order = ', num2str(out.order)])
         
         xlabel('x_1')
@@ -31,14 +35,7 @@ for i = 1:length(out_sim)
         legend('location', 'northwest') 
 
         %title formatting
-        peak_str = ['Peak Value for Trajectories = ', num2str(out.peak_val, 4)];
-        if out.recover
-            %peak_str = [peak_str, ' (optimal)'];
-            if ~out.dynamics.time_indep
-                peak_str = [peak_str, ' at time = ', num2str(out.tp, 3)];
-            end
-        end
-        
+        peak_str = ['Peak Value for Trajectories = ', num2str(out.peak_val, 4)];       
         title(peak_str)
 
         
@@ -46,9 +43,12 @@ for i = 1:length(out_sim)
         legend('location', 'northwest') 
         
     %end
-    else        
-        plot(out_sim{i}.x(:, 1), out_sim{i}.x(:, 2), 'c', 'HandleVisibility', 'off');
-
+    else 
+        if out.dynamics.discrete
+            scatter(out_sim{i}.x(:, 1), out_sim{i}.x(:, 2), '.c', 'HandleVisibility', 'off');
+        else
+            plot(out_sim{i}.x(:, 1), out_sim{i}.x(:, 2), 'c', 'HandleVisibility', 'off');
+        end
     end
 end
 
@@ -96,14 +96,19 @@ if out.recover && (nargin == 3)
     npeak_traj = length(out_sim_peak);
     for k = 1:npeak_traj
         if k == 1
-            plot(out_sim_peak{k}.x(:, 1), out_sim_peak{k}.x(:, 2), 'b', 'HandleVisibility', 'off', 'Linewidth', 2);
-
+            if out.dynamics.discrete
+                scatter(out_sim_peak{k}.x(:, 1), out_sim_peak{k}.x(:, 2), '.b', 'HandleVisibility', 'off');
+            else
+                plot(out_sim_peak{k}.x(:, 1), out_sim_peak{k}.x(:, 2), 'b', 'HandleVisibility', 'off');
+            end
             scatter(out.xp(1, k), out.xp(2, k), 200, '*b', 'DisplayName', 'Peak Achieved', 'LineWidth', 2);        
 
         else
-
-            plot(out_sim_peak{k}.x(:, 1), out_sim_peak{k}.x(:, 2), 'b', 'HandleVisibility', 'off', 'Linewidth', 2);
-
+            if out.dynamics.discrete
+                scatter(out_sim_peak{k}.x(:, 1), out_sim_peak{k}.x(:, 2), '.b', 'HandleVisibility');
+            else
+                plot(out_sim_peak{k}.x(:, 1), out_sim_peak{k}.x(:, 2), 'b', 'HandleVisibility', 'off');
+            end
             scatter(out.xp(1, k), out.xp(2, k), 200, '*b', 'HandleVisibility', 'off','LineWidth', 2);        
        end
     end

@@ -37,14 +37,22 @@ for i = 1:length(out_sim)
                 plot(t_curr, nonneg_curr(k, :), 'c','DisplayName', 'Trajectories')
                 title('Forward Change in Value Function')
                 xlabel('time')
-                ylabel('$\beta v_+ (x) - L_f v_+(x)$', 'Interpreter', 'Latex')                
+                if out.dynamics.discrete
+                    ylabel('$v_+ (x) - \alpha v_+ \circ f(x)$', 'Interpreter', 'Latex')                
+                else
+                    ylabel('$\beta v_+ (x) - L_f v_+(x)$', 'Interpreter', 'Latex')                
+                end
                 legend('location', 'east')
             else
 %                 title(['Forward Change in Value Function', num2str(k-1)])
                 title('Backward Change in Value Function')
                 xlabel('time')
 %                 ylabel(['L_{f', num2str(k-1), '} v(t,x)'])
-                ylabel('$\beta v_- (x) + L_f v(x)$', 'Interpreter', 'Latex')
+                if out.dynamics.discrete                
+                    ylabel('$v_- \circ f(x) + \alpha v_-(x)$', 'Interpreter', 'Latex')
+                else
+                    ylabel('$\beta v_- (x) + L_f v_-(x)$', 'Interpreter', 'Latex')
+                end
                 legend('location', 'east')
                 plot(t_curr, nonneg_curr(k, :), 'c', 'DisplayName', 'Trajectories')
             end
@@ -62,7 +70,7 @@ if nargin == 3
     for k = 1:(nplt)
         subplot(nplt, 1, k)
         hold on
-        plot(out_sim_peak{1}.t, out_sim_peak{1}.nonneg(k, :), 'b', 'LineWidth', 1.5, 'DisplayName', 'Peak Traj.')           
+        plot(out_sim_peak{1}.t, out_sim_peak{1}.nonneg(k, :), 'b', 'DisplayName', 'Peak Traj.')           
     end       
     
 %     if ~out.dynamics.time_indep

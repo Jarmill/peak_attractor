@@ -15,12 +15,14 @@ end
 
 %deal with uncertain parameters later, assume
 if dynamics.discrete
-    X = zeros(length(x0), Tmax+1);
+    X = zeros(Tmax+1, length(x0));
     X(1, :) = x0;
     for i = 1:Tmax
-        xnext = out.dynamics(X(i, :));
+        xnext = dynamics.f{1}(i, X(i, :)');
         X(i+1, :) = xnext;
     end
+    T = 0:Tmax;
+    Tstart = ceil(Tstart);
 else
     if length(Tmax)==2
         [T,X] = odefcn(dynamics.f{1},Tmax,x0);

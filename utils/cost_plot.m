@@ -24,7 +24,7 @@ end
 
 if nargin == 3  
     hold on
-    plot(out_sim_peak{1}.t, out_sim_peak{1}.cost, 'b', 'LineWidth', 3, 'DisplayName', 'Peak Traj.')           
+    plot(out_sim_peak{1}.t, out_sim_peak{1}.cost, 'b', 'DisplayName', 'Peak Traj.')           
     
 %     if isfield(out, 'tp')
     %correct this when I can plot forward and backwards trajectories
