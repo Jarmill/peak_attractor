@@ -35,7 +35,7 @@ for i = 1:length(out_sim)
         legend('location', 'northwest') 
 
         %title formatting
-        peak_str = ['Peak Value for Trajectories = ', num2str(out.peak_val, 4)];       
+        peak_str = ['Peak Value for Trajectories = ', num2str(out.peak_val, 4), ' order = ', num2str(out.order)];       
         title(peak_str)
 
         

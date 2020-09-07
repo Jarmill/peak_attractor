@@ -35,7 +35,7 @@ for i = 1:length(out_sim)
                 plot(t_curr, nonneg_curr(k, :), 'c', 'DisplayName', 'Trajectories')
             elseif k == 2    
                 plot(t_curr, nonneg_curr(k, :), 'c','DisplayName', 'Trajectories')
-                title('Forward Change in Value Function')
+                title('Forward Discounted Change in Value Function')
                 xlabel('time')
                 if out.dynamics.discrete
                     ylabel('$v_+ (x) - \alpha v_+ \circ f(x)$', 'Interpreter', 'Latex')                
@@ -45,7 +45,7 @@ for i = 1:length(out_sim)
                 legend('location', 'east')
             else
 %                 title(['Forward Change in Value Function', num2str(k-1)])
-                title('Backward Change in Value Function')
+                title('Backward Discounted Change in Value Function')
                 xlabel('time')
 %                 ylabel(['L_{f', num2str(k-1), '} v(t,x)'])
                 if out.dynamics.discrete                
