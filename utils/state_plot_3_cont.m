@@ -60,22 +60,37 @@ end
 
 %implicit curves
 syms y [3 1]
-syms t
 
-MD = 110;
-
-
-% MD = 60;
+% MD = 120;
+MD = 80;
 
 vy = out.func.vval(y);    
 fimplicit3(vy, [stretch(xlim, box_margin), stretch(ylim, box_margin), stretch(zlim, box_margin)], 'EdgeColor', 'None','FaceColor', 'k', 'FaceAlpha', 0.3, ...
         'DisplayName', 'Invariant Set', 'MeshDensity', MD)
 camlight; lighting phong;
 
-cy = out.func.cost(y) - out.peak_val;
+%deal with multiple costs later
 
-fimplicit3(cy + 1e-8*sum(y), [xlim, ylim, zlim], 'EdgeColor', 'None','FaceColor', 'r', 'FaceAlpha', 0.3, ...
+nobj = length(out.func.theta);
+for i = 1:nobj % multiple objectives
+    curr_cost = @(y) out.func.cost_cell{i}(y);
+    cy = curr_cost(y) - out.peak_val;
+    
+    if i == 1
+        fimplicit3(cy + 1e-8*sum(y), [xlim, ylim, zlim], 'EdgeColor', 'None','FaceColor', 'r', 'FaceAlpha', 0.3, ...
             'DisplayName', 'Cost Bound', 'MeshDensity', MD)
+
+    else
+        fimplicit3(cy + 1e-8*sum(y), [xlim, ylim, zlim], 'EdgeColor', 'None','FaceColor', 'r', 'FaceAlpha', 0.3, ...
+            'HandleVisibility', 'Off', 'MeshDensity', MD)
+
+    end
+end
+
+% cy = out.func.cost(y) - out.peak_val;
+% 
+% fimplicit3(cy + 1e-8*sum(y), [xlim, ylim, zlim], 'EdgeColor', 'None','FaceColor', 'r', 'FaceAlpha', 0.3, ...
+%             'DisplayName', 'Cost Bound', 'MeshDensity', MD)
 
 
 view(62, 17)

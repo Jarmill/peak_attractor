@@ -1,11 +1,15 @@
-function [out_sim] = attractor_sim(dynamics, x0, Tmax, nw, odefcn)
+function [out_sim] = attractor_sim(dynamics, x0, Tmax, Tstart, nw, odefcn)
 %ATTRACTOR_SIM Simulate the path of a trajectory in an attractor
 
 if nargin < 4
-    nw = 0;
+    Tstart = 0.2*Tmax;
 end
 
 if nargin < 5
+    nw = 0;
+end
+
+if nargin < 6
     odefcn = @ode45;
 end
 
@@ -25,7 +29,10 @@ else
     end
 end
 
-
+%time shift to get on the attractor
+X = X(T >= Tstart, :);
+T = T(T >= Tstart);
+T = T - Tstart;
 
 out_sim = struct;
 out_sim.t = T;

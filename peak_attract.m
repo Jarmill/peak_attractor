@@ -323,7 +323,6 @@ else
     %variables. A degree-1 measure is required.
     theta = dual_rec{2};
 end
-opt.theta = theta;
 
 v_fw = dual_rec_v_fw'*monp;
 v_bk = dual_rec_v_bk'*monp;
@@ -344,7 +343,6 @@ for i = 1:nsys
 end
 
 %% Output results to data structure
-%out = 1;
 
 out = struct;
 
@@ -414,12 +412,14 @@ out.func.Lv_fw = Lv_fw;
 out.func.Lv_bk = Lv_bk;
  
 % %functions that should be nonnegative along valid trajectories
-% out.func.cost_all = cell(nobj, 1);
-% for i = 1:nobj
-%     out.func.cost_all{i} = @(x) (eval(options.obj(i), xp, x));
-% end
+out.func.cost_cell = cell(nobj, 1);
+for i = 1:nobj
+    out.func.cost_cell{i} = @(x) (eval(options.obj(i), xp, x));
+end
+
+
 out.func.cost_all = @(x) eval(options.obj, xp, x);
-% 
+
 if nobj > 1
     out.func.cost = @(x) min(eval(options.obj, xp, x));
 else
