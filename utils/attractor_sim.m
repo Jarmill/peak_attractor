@@ -17,8 +17,15 @@ end
 if dynamics.discrete
     X = zeros(Tmax+1, length(x0));
     X(1, :) = x0;
+    if nw > 0
+        %includes uncertain fixed parameters
+        curr_f = @(t, x) dynamics.f{1}(t, x, w0);        
+    else
+        %no uncertain fixed parameters
+        curr_f = dynamics.f{1};        
+    end
     for i = 1:Tmax
-        xnext = dynamics.f{1}(i, X(i, :)');
+        xnext = curr_f(i, X(i, :)');
         X(i+1, :) = xnext;
     end
     T = 0:Tmax;
@@ -39,7 +46,21 @@ T = T - Tstart;
 out_sim = struct;
 out_sim.t = T;
 out_sim.x = X;
+if nw > 0
+    out_sim.w = w0;
+else
+    out_sim.w = [];
+end
 out_sim.cost = dynamics.cost(X');
-out_sim.nonneg = dynamics.nonneg(X');
+%out_sim.nonneg = dynamics.nonneg(X');
+
+if isfield(dynamics, 'nonneg')    
+    if nw > 0        
+        out_sim.nonneg = dynamics.nonneg(X', w0);        
+    else
+        out_sim.nonneg = dynamics.nonneg(X');        
+    end
+end
+
 end
 
