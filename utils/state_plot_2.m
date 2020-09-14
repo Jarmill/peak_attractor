@@ -55,7 +55,11 @@ end
 
 for i = 1:length(out_sim)
     if i == 1    
-       scatter(out_sim{i}.x(1, 1), out_sim{i}.x(1, 2), 100, 'k', 'DisplayName', 'Initial Points');        
+        if ~isempty(out.x0)
+            scatter(out.x0(1), out.x0(2), 100, 'k', 'DisplayName', 'Initial Points');        
+        else
+            scatter(out_sim{i}.x(1, 1), out_sim{i}.x(1, 2), 100, 'k', 'DisplayName', 'Initial Points');                    
+        end
 
     else
        

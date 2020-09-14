@@ -31,6 +31,8 @@ classdef peak_attract_options < handle
         %type @mpol/supcon       
         state_supp = []; %states to consider, set X
          
+        state_init = []; %trajectories must pass through (start) in set X0
+        
         %Coordinate ranges for variables for scaling
         %state variables lie in a box (utils/box_process)
         

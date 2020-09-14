@@ -17,7 +17,8 @@ function [out] = peak_attract(options, order)
 %       List:       Maximize the minimum of all objectives
 %                      Each entry is a polynomial       
 %   
-%   state_supp: Support set of X
+%   state_supp: Support set of X  (by default the box in `box')
+%   state_init: Support set of X0 (by default is X)
 %   param:      Support of parametric uncertainty w (if var.w nonempty)
 %       
 %   rank_tol:   Rank tolerance for moment matrix to be rank-1
@@ -116,6 +117,19 @@ end
     end
 % end
 
+%deal with initial measure
+INITIAL = ~isempty(options.state_init);
+if INITIAL
+    mpol('x0', nx, 1);
+
+    X0 = subs([options.state_init; Xsupp; XR], options.var.x, x0);
+    %TODO: deal with W param scaling
+else
+    x0 = [];
+    X0 = [];
+end
+
+
 %number of objectives (1 standard, 2+ minimum)
 nobj = length(options.obj);
 
@@ -149,11 +163,21 @@ if nw > 0
     
     W= options.param;
     
+    if INITIAL
+        mpol('w0', nw, 1);
+        W0 = subs(W, wp, w0);
+    else
+        w0 = [];
+        W0 = [];
+    end
+    
     %W = [Wp; W0; wp == w0] 
     
 else
     W = [];    
     wp = [];
+    w0 = [];
+    W0 = [];
 end
 
 
@@ -223,8 +247,17 @@ end
 
 supp_con = [Xp; X_occ; W];
 %careful of monic substitutions ruining dual variables
-Liou_fw = - yp + Ay_fw ;
+Liou_fw = - yp + Ay_fw;
 Liou_bk = - yp + Ay_bk;
+
+if INITIAL
+    mu0 = meas([x0; w0]);
+    mon0 = mmon([x0; w0], d);
+    y0 = mom(mon0);
+    Liou_bk = Liou_bk + y0;
+    supp_con = [supp_con; X0; W0];
+end
+
 mom_con = [mass(mup) == 1; Liou_fw == 0; Liou_bk == 0];
 
 obj = options.obj;
@@ -296,6 +329,17 @@ rankp = rank(Mp_1, options.rank_tol);
 
 xp_rec = double(mom(xp));
 
+if INITIAL
+    M0 = double(mmat(mu0));
+    M0_1 = M0(1:(nvar+1), 1:(nvar+1));
+    rank0 = rank(M0_1, options.rank_tol);
+    x0_rec = double(mom(x0))/M0(1,1);
+else
+    M0 = [];
+    x0_rec = [];
+end
+
+
 %how does this work with moment substitutions?
 % %necessary with c^2 + s^2 = 1
 % if options.scale
@@ -349,9 +393,11 @@ out = struct;
 %recover optima
 out.order = order;
 out.peak_val = obj_rec;
+out.x0 = x0_rec;
 out.xp = xp_rec;
 out.recover = (rankp == 1);
 %moment matrices
+out.M0 = M0;
 out.Mp = Mp;
 out.M_fw = M_fw;
 out.M_bk = M_bk;
