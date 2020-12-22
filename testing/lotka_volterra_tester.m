@@ -26,8 +26,8 @@ x0 = [2; 0.5];
 
 f = f0;
 % objective = x'*x;
-% objective = x(1)^2;
-objective = x(2);
+objective = x(1);
+% objective = x(2);
 % objective = x(1)^2 + 2*x(2)^2 + 0.1*x(1)*x(2);
 
 % objective = [x(1)^2; x(2)^2];
@@ -42,7 +42,7 @@ p_opt.state_supp = Xsupp;
 p_opt.state_init = (x == x0);
 p_opt.box = [0, 3; 0, 2];
 
-p_opt.discount = 0.2;
+p_opt.discount =1;
 p_opt.obj = objective;
 
 

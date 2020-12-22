@@ -255,6 +255,7 @@ if INITIAL
     mon0 = mmon([x0; w0], d);
     y0 = mom(mon0);
     Liou_bk = Liou_bk + y0;
+%     Liou_fw = Liou_fw - y0;
     supp_con = [supp_con; X0; W0];
 end
 

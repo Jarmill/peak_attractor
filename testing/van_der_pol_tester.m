@@ -37,17 +37,36 @@ order = 6;
 out = peak_attract(p_opt, order);
 peak_val = out.peak_val;
 xp = out.xp;
+
+Mp_mix = out.Mp(2:3, 2:3);
+rank_sym_p = rank(Mp_mix, p_opt.rank_tol);
+
+if rank_sym_p==1
+    sym_signp = sign(Mp_mix(2,1));    
+    xp_abs = sqrt([Mp_mix(1,1); Mp_mix(2,2)]);
+    xp = xp_abs * [1 sym_signp];
+    
+    out.recover = 1;
+    out.xp = xp;
+end
+
+
+
 end
 
 if PLOT
+
+    
     Tmax_sim = 150;
-    x0 = [0.486;-0.2608];
+    %x0 = [0.486;-0.2608];
+    x0 = [0.3; 0.0];
     out_sim = {attractor_sim(out.dynamics, x0, Tmax_sim)};
     if out.recover == 1
-        %approximate initial condition recovered
-        out_sim_peak = {attractor_sim(out.dynamics, out.xp, Tmax_sim)};
+        %approximate initial condition recovered        
+        out_sim_peak = {attractor_sim(out.dynamics, out.xp(:, 1), Tmax_sim), ...
+                        attractor_sim(out.dynamics, out.xp(:, 2), Tmax_sim)};
         out_sim_peak{1}.tp = 0;
-
+        out_sim_peak{2}.tp = 0;
         nplot = nonneg_plot(out, out_sim, out_sim_peak);
         cplot = cost_plot(out, out_sim, out_sim_peak);
         splot = state_plot_2(out, out_sim, out_sim_peak);
