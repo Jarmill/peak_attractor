@@ -1,4 +1,4 @@
-function [fig] = state_plot_3_cont(out, out_sim, out_sim_peak)
+function [fig] = state_plot_3_cont(out, out_sim, out_sim_peak, out_sim_peak_rev)
 %STATE_PLOT_2 Plot states of system trajectories if x has 2 states
 %out: information about the recovered solution
 %out_sim: function evaluation on random sample trajectories
@@ -61,8 +61,8 @@ end
 %implicit curves
 syms y [3 1]
 
-% MD = 120;
-MD = 80;
+MD = 130;
+% MD = 80;
 
 vy = out.func.vval(y);    
 fimplicit3(vy, [stretch(xlim, box_margin), stretch(ylim, box_margin), stretch(zlim, box_margin)], 'EdgeColor', 'None','FaceColor', 'k', 'FaceAlpha', 0.3, ...
@@ -95,25 +95,27 @@ end
 
 view(62, 17)
 
-if out.recover && nargin == 3
+if out.recover && nargin >= 3
     %plot the peak functions too
     npeak_traj = length(out_sim_peak);
     for k = 1:npeak_traj
         plot3(out_sim_peak{k}.x(:, 1), out_sim_peak{k}.x(:, 2), out_sim_peak{k}.x(:, 3), 'b',  'HandleVisibility', 'off', 'LineWidth', 2);
             
-        if k == 1
-%             plot3(out_sim_peak{1}.x(:, 1), out_sim_peak{1}.x(:, 2), out_sim_peak{1}.x(:, 3), 'b', 'DisplayName', 'Peak Traj.', 'LineWidth', 2);
-            
+        if k == 1          
             %initial condition
-%             scatter3(out.x0(1, k), out.x0(2, k), out.x0(3, k), 200, 'ob', 'DisplayName', 'Peak Initial', 'LineWidth', 2);        
-            scatter3(out.xp(1, k), out.xp(2, k), out.xp(3, k), 200, '*b', 'DisplayName', 'Peak Achieved', 'LineWidth', 2);        
-        else
-            
-            
+          scatter3(out.xp(1, k), out.xp(2, k), out.xp(3, k), 200, '*b', 'DisplayName', 'Peak Achieved', 'LineWidth', 2);        
+        else            
             %initial condition
-%             scatter3(out.x0(1, k), out.x0(2, k), out.x0(3, k), 200, 'ob',  'HandleVisibility', 'off', 'LineWidth', 2);        
             scatter3(out.xp(1, k), out.xp(2, k), out.xp(3, k), 200, '*b',  'HandleVisibility', 'off', 'LineWidth', 2);        
         end
+    end
+end
+
+if out.recover && nargin == 4
+    %plot the peak functions too
+    npeak_traj = length(out_sim_peak_rev);
+    for k = 1:npeak_traj
+        plot3(out_sim_peak_rev{k}.x(:, 1), out_sim_peak_rev{k}.x(:, 2), out_sim_peak_rev{k}.x(:, 3), 'b',  'HandleVisibility', 'off', 'LineWidth', 2);            
     end
 end
 

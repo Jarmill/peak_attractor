@@ -53,7 +53,7 @@ if PLOT
     Tmax_sim = 4000;
     x0 = q.*[1; 0];
 
-    out_sim = {attractor_sim(out.dynamics, x0, Tmax_sim)};
+    out_sim = {attractor_sim(out.dynamics, x0, Tmax_sim, 0)};
     if out.recover == 1
         %approximate initial condition recovered
         out_sim_peak = {attractor_sim(out.dynamics, out.xp, 0.8*Tmax_sim, 0)};
